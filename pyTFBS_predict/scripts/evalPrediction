@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+#
+# evalPrediction.py True Prediction positive_label
+#   True:       is a column of labels, each row is for each sample
+#   Prediction: is a column of prediction probability, with
+         #      positive class probability 1, negative class prob. 0
+# for two-class problem, "Prediction" is probability of being positive
+#
+# Copyright (C) 2014 Sheng Liu - sliu96@jhmi.edu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import numpy as np
+import sys
+from sklearn.metrics import roc_curve, auc,precision_recall_curve,confusion_matrix
+import pylab as pl
+import pandas as pd
+
+if len(sys.argv)<4:
+    print 'Usage: evalPrediction.py True Prediction positive_label'
+    print 'True is a column of labels, each row is for each sample'
+    print 'Prediction is a column of prediction probability, with'
+    print 'positive class probability 1, negative class prob. 0'
+    exit(1)
+if len(sys.argv)==5:
+    thresh=float(sys.argv[4])
+else:
+    thresh=0.50
+
+Y0 = pd.read_table(sys.argv[1],header=None)
+pred= pd.read_table(sys.argv[2],header=None)
+pos_label=float(sys.argv[3])
+Yt=np.array(Y0)
+Yt[Y0!=pos_label]=2
+Yt[Y0==pos_label]=1
+
+predl=np.array(pred[0].values)
+predl[predl>thresh]=1
+predl[predl<=thresh]=2
+cm=confusion_matrix(Yt,predl,labels=[1,2]).T
+if not (cm[0,0]+cm[0,1])==0:
+    fdr= (0.0+cm[0,1])/(cm[0,0]+cm[0,1])
+else:
+    fdr=-1
+
+fpr, tpr, thresholdsft = roc_curve(Yt, pred,pos_label=pos_label)
+
+model_auc = auc(fpr, tpr)
+
+precision, recall, thresholdspr = precision_recall_curve(Yt, pred,pos_label=pos_label)
+print 'precision ',str(precision)[1:-1]
+print 'recall', str(recall)[1:-1]
+print 'thresholdspr', str(thresholdspr)[1:-1]
+
+print 'confusion matrix (column is true value)'
+print cm
+print 'optimal threshold FPR-TPR'
+idx=[i for i,j in enumerate(pow(tpr-1,2)+pow(fpr,2)) if j == min(pow(tpr-1,2)+pow(fpr,2))]
+if len(idx)>0:
+    print thresholdsft[idx[0]-1],'at ', (fpr[idx[0]-1],tpr[idx[0]-1])
+else:
+    print 'optimal threshold FPR-TPR not found'
+
+print 'optimal threshold PR-REC'
+idx=[i for i,j in enumerate(pow(precision-1,2)+pow(recall-1,2)) if j == min(pow(precision-1,2)+pow(recall-1,2))]
+if len(idx)>0:
+    print thresholdspr[idx[0]-1],'at ', (precision[idx[0]-1],recall[idx[0]-1])
+else:
+    print 'optimal threshold PR-REC not found'
+
+print 'optimal threshold PR'
+idx=[i for i,j in enumerate(precision[:-1]) if j == max(precision[:-1])]
+if len(idx)>0:
+    print thresholdspr[idx[0]-1],'at ', max(precision[:-1])
+else:
+    print 'optimal threshold PR not found'
+
+prauc=auc(recall,precision)
+print 'auc, prauc, fdr'
+print model_auc, prauc ,fdr
+
+pl.clf()
+pl.plot(fpr, tpr, label='ROC curve (area = %0.2f)' % model_auc)
+pl.plot([0, 1], [0, 1], 'k--')
+pl.xlim([0.0, 1.0])
+pl.ylim([0.0, 1.0])
+pl.xlabel('False Positive Rate')
+pl.ylabel('True Positive Rate')
+pl.title('Receiver operating characteristic curve')
+pl.legend(loc="lower right")
+figure=pl.gcf()
+figure.set_size_inches(8,8)
+#pl.savefig(sys.argv[2]+"_tssdata__AUC2.png", dpi=1200)
+pl.show()
+
+pl.clf()
+pl.plot(precision, recall, label='PR curve (area = %0.2f)' % prauc)
+#pl.plot([0, 1], [1, 0], 'k--')
+pl.xlim([0.0, 1.0])
+pl.ylim([0.0, 1.0])
+pl.xlabel('Precision')
+pl.ylabel('Recall')
+pl.title(sys.argv[2])
+pl.legend(loc="lower right")
+figure=pl.gcf()
+figure.set_size_inches(8,8)
+#pl.savefig(sys.argv[2]+"_tssdata__PR2.png", dpi=1200)
+pl.show()
+

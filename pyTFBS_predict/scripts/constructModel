@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# generateModel.py training_feature_file output_file
+#
+# Copyright (C) 2014 Sheng Liu - sliu96@jhmi.edu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import sys, os.path
+import pandas as pd
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+import cPickle as pickle
+from sklearn.externals import joblib
+
+def str_is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+def str_is_integer(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+
+
+
+if len(sys.argv)<3 or len(sys.argv)>5:
+    print 'Usage: constructModel.py training_feature_file output_file classifier parameters_for_classifier\n'
+    print 'parameters format: e.g.: criterion=\'gini\', max_depth=None'
+    exit(1)
+if len(sys.argv)==3: #default classifier is randomForest
+    classifier='RF'
+
+data=pd.read_csv(sys.argv[1],header=None,delimiter="\t")
+data=data.fillna(0)
+#print data.shape
+#fset=[3,4,5,6,7,8,9,10,11,12,13] 
+X=data[list(xrange(3,data.shape[1]-1))].values
+Y=data[data.shape[1]-1].values
+print 'Training size: ',X.shape
+print 'Positive size: ',np.where(Y==1)[0].shape
+
+if sys.argv[3] =='SVM':
+    print 'generating model using SVM...'
+    model=SVC()
+    parameters=dict()
+    if len(sys.argv)==5:
+        for par in sys.argv[4].split(','):
+           partmp=par.split("=")[1].translate(None,'\'')
+           if partmp=='None':
+               partmp=None
+           elif str_is_integer(partmp):
+               partmp=int(partmp)
+           elif str_is_float(partmp):
+               partmp=float(partmp)
+           elif partmp=="True":
+               partmp=True
+           elif partmp=="False":
+               partmp=False
+           parameters[par.split('=')[0]]=partmp
+    model.set_params(**parameters)
+    model.fit(X,Y)
+    joblib.dump(model,sys.argv[2],compress=9)
+else:
+    print 'generating model using RF...'
+    rf=RandomForestClassifier(n_estimators=100)
+    parameters=dict()
+    if len(sys.argv)==5:
+        for par in sys.argv[4].split(','):
+           partmp=par.split("=")[1].translate(None,'\'')
+           if partmp=='None':
+               partmp=None
+           elif str_is_integer(partmp):
+               partmp=int(partmp)
+           elif str_is_float(partmp):
+               partmp=float(partmp)
+           elif partmp=="True":
+               partmp=True
+           elif partmp=="False":
+               partmp=False
+           parameters[par.split('=')[0]]=partmp
+    rf.set_params(**parameters)
+    rf.fit(X,Y)
+    joblib.dump(rf,sys.argv[2],compress=9)
+
+print 'done'

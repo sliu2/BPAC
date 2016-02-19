@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: pyTFBS-predict
+Version: 0.1
+Summary: Predict TFBS from sequence and DNase-seq/ATAC-seq data
+Home-page: http://bioinfo.wilmer.jhu.edu/pyTFBS_predict
+Author: Sheng Liu
+Author-email: sliu96@jhmi.edu
+License: GPLv3
+Description: Readme
+        
+        
+Platform: UNKNOWN

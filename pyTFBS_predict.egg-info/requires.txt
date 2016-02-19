@@ -1,0 +1,8 @@
+numpy
+matplotlib
+pysam >= 0.7.5
+pyDNase
+pybedtools
+pyBigWig
+pandas
+sklearn

@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+#
+# generateAttribute.py config_file output_file
+# Copyright (C) 2014 Sheng Liu - sliu96@jhmi.edu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import sys, os.path
+import ConfigParser
+from pybedtools import BedTool as BT
+import pyTFBS_predict
+import pandas as pd
+
+if not len(sys.argv)==3:
+    print 'Usage: generateAttributes.py config_file output_file\n'
+    exit(1)
+
+Config = ConfigParser.ConfigParser()
+Config.read(sys.argv[1])
+bed_file=Config.get('setting','bed_file')
+read_bw_file=Config.get('setting','read_bw_file')
+cut_bw_file=Config.get('setting','cut_bw_file')
+bam_file=Config.get('setting','bam_file')
+TSSbedFile=Config.get('setting', 'TSSbedFile')
+chromsizeFile=Config.get('setting','chromsizeFile')
+phastConsFile=Config.get('setting','phastConsFile')
+ChIPpeakFile=Config.get('setting','ChIPpeakFile')
+
+regions=BT(bed_file)
+if len(str(regions[0]).split('\t'))<5:
+    print "error, region files must contain at least 5 columns (bed6 format)\n"
+    exit(1)
+
+# input has ChIP-seq peaks, generate features for training ...
+if not (ChIPpeakFile == "0" or  (ChIPpeakFile =="")):
+    print 'ChIp-seq peaks given, generating positive/negative sets'
+    ChIPseq=BT(ChIPpeakFile)
+
+    positiveRegions=regions.intersect(ChIPseq,wa=True,u=True)
+    negativeRegions=regions.subtract(ChIPseq)
+    
+    featureP=pyTFBS_predict.genAttribute(positiveRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,1)
+    featureN=pyTFBS_predict.genAttribute(negativeRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,2)
+
+    dfs=pd.concat([featureP, featureN])
+    dfs.to_csv(sys.argv[2], sep="\t",header=False,index=False)
+
+    print 'Done.'
+
+# no ChIP-seq provided, generate features only, label as -1
+else:
+    
+    print 'generating conservation score feature'
+    feature=pyTFBS_predict.genAttribute(regions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,-1)
+    feature.to_csv(sys.argv[2], sep="\t",header=False,index=False)
+    print 'Done.'
+
