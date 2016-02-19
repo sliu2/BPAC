@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 #
-# evalPrediction.py True Prediction positive_label
+# evalPrediction True Prediction positive_label
 #   True:       is a column of labels, each row is for each sample
 #   Prediction: is a column of prediction probability, with
          #      positive class probability 1, negative class prob. 0
@@ -29,7 +29,7 @@ import pylab as pl
 import pandas as pd
 
 if len(sys.argv)<4:
-    print 'Usage: evalPrediction.py True Prediction positive_label'
+    print 'Usage: evalPrediction True Prediction positive_label'
     print 'True is a column of labels, each row is for each sample'
     print 'Prediction is a column of prediction probability, with'
     print 'positive class probability 1, negative class prob. 0'

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# generateModel.py training_feature_file output_file
+# constructModel training_feature_file output_file classifi    er parameters_for_classifier
 #
+# classifier: RF or SVM; parameters format: e.g.: criterion=\'gini\',max_depth=None
 # Copyright (C) 2014 Sheng Liu - sliu96@jhmi.edu
 #
 # This program is free software: you can redistribute it and/or modify
@@ -44,8 +45,8 @@ def str_is_integer(s):
 
 
 if len(sys.argv)<3 or len(sys.argv)>5:
-    print 'Usage: constructModel.py training_feature_file output_file classifier parameters_for_classifier\n'
-    print 'parameters format: e.g.: criterion=\'gini\', max_depth=None'
+    print 'Usage: constructModel training_feature_file output_file classifier parameters_for_classifier\n'
+    print 'classifier: RF or SVM; parameters format: e.g.: criterion=\'gini\',max_depth=None'
     exit(1)
 if len(sys.argv)==3: #default classifier is randomForest
     classifier='RF'
