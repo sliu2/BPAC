@@ -20,7 +20,7 @@
 import sys, os.path
 import ConfigParser
 from pybedtools import BedTool as BT
-import pyTFBS_predict
+import BPAC
 import pandas as pd
 
 if not len(sys.argv)==3:
@@ -51,8 +51,8 @@ if not (ChIPpeakFile == "0" or  (ChIPpeakFile =="")):
     positiveRegions=regions.intersect(ChIPseq,wa=True,u=True)
     negativeRegions=regions.subtract(ChIPseq)
     
-    featureP=pyTFBS_predict.genAttribute(positiveRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,1)
-    featureN=pyTFBS_predict.genAttribute(negativeRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,2)
+    featureP=BPAC.genAttribute(positiveRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,1)
+    featureN=BPAC.genAttribute(negativeRegions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,2)
 
     dfs=pd.concat([featureP, featureN])
     dfs.to_csv(sys.argv[2], sep="\t",header=False,index=False)
@@ -63,7 +63,7 @@ if not (ChIPpeakFile == "0" or  (ChIPpeakFile =="")):
 else:
     
     print 'generating conservation score feature'
-    feature=pyTFBS_predict.genAttribute(regions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,-1)
+    feature=BPAC.genAttribute(regions, read_bw_file, cut_bw_file, bam_file, TSSbedFile,chromsizeFile,phastConsFile,-1)
     feature.to_csv(sys.argv[2], sep="\t",header=False,index=False)
     print 'Done.'
 
