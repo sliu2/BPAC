@@ -1,9 +1,9 @@
-# pyTFBS_predict
+# BPAC (TF Binding Prediction from ACcessibility data)
 
 Predict TFBS from sequence information, chromatin accessible information, and ChIP-seq.
 
 ## Installation
-require numpy, pyBigWig package to be installed before pyTFBS_predict installation.
+require numpy, pyBigWig package to be installed before BPAC installation.
 
 python setup.py install
 
