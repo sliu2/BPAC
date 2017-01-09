@@ -9,6 +9,17 @@ python setup.py install
 
 ## Usage
 
+### Preprocessing (required for offline prediction)
+generate read profile bigwig file, requires bedtools, ucsc tools.  
+1) bedtools genomecov -ibam -bg -split -i sample.bam -g genome_file > sample_read.bg  
+2) bedGraphToBigWig sample.bg genome_file sample_read.bw  
+generate cut profile bigwig file, requires ucsc tools.  
+1) cut_profile.py genome_bed_file sample.bam sample_cut.wig  
+2) wigToBigWig sample_cut.wig genome_file sample_cut.bw  
+replace sample with your acutal filenames  
+genome_file is hg19.chrom.sizes for hg19, mm9.chrom.sizes for mm9.  
+genome_bed_file is hg19_sorted.bed for hg19, mm9_sorted.bed for mm9.  
+
 ### Generate feature file
 
 generateAttributes generateAttribute.py config_file output_file  
@@ -23,12 +34,17 @@ chromsizeFile=example.chrom.sizes
 phastConsFile=example.phastCons.bw  
 ChIPpeakFile=example.ChIP.bed  
   
-bed_file is bed6 format with score representing PWM score.  
-If ChIPpeakFile entry is empty, it will generate label "-1" as undecided and can be used for test  
-If read_bw_file or cut_bw_file is not provided, bam_file is used instead, read counts and cut counts are then generated from   
+bed_file is bed6 format with score representing PWM score, e.g.,  http://bioinfo.wilmer.jhu.edu/BPAC/data/example.bed6.
+
+read_bw_file or cut_bw_file are generated through preprocessing section. If read_bw_file or cut_bw_file is not provided, bam_file is used instead, read counts and cut counts are then generated from   
 bam file instead of bw files. Bam file needs to be indexed by running samtools index bam_file. Total number of reads in the bam  
 file is stored in bam_file".reads" file. If it is not provided, it is counted from bam_file assuming the bam_file is from the  
 whole genome. bam_file processing may be very slow.  
+chromsizFile or TSSbedFile are provided within package for different genomes
+phastConsFile can be downloaded from UCSC browser:   
+http://hgdownload.cse.ucsc.edu/goldenpath/hg19/phastCons100way/hg19.100way.phastCons.bw for hg19  
+ftp://hgdownload.cse.ucsc.edu/goldenPath/mm9/phastCons30way/vertebrate/ for mm9  
+If ChIPpeakFile entry is empty, it will generate label "-1" as undecided and can be used for test. ChIPpeakFile is also in bed6 format.   
 The first 3 columns of feature file are chromosome start end  
 e.g.:  
 generateAttributes example.cfg output_feature.tsv  
