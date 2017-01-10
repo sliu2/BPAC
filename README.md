@@ -1,6 +1,6 @@
 # BPAC (TF Binding Prediction from ACcessibility data)
 
-A general model for predicting transcription factor bindings from sequence and DHS/ATAC-seq information. 
+BPAC: A universal model for prediction of transcription factor binding sites based on chromatin accessibility.
 
 ## Installation
 require numpy, pyBigWig package to be installed before BPAC installation.
@@ -9,11 +9,12 @@ python setup.py install
 
 ## Usage
 
-### Preprocessing (required for offline prediction)
-generate read profile bigwig file, requires bedtools, ucsc tools.  
+### Preprocess (required for offline prediction)
+Generate read profile (in bigwig format). Require bedtools (https://github.com/arq5x/bedtools2) and ucsc tools (http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/).  
 1) bedtools genomecov -ibam -bg -split -i sample.bam -g genome_file > sample_read.bg  
 2) bedGraphToBigWig sample.bg genome_file sample_read.bw  
-generate cut profile bigwig file, requires ucsc tools.  
+
+Generate cut profile (in bigwig format). Require ucsc tools.  
 1) cut_profile.py genome_bed_file sample.bam sample_cut.wig  
 2) wigToBigWig sample_cut.wig genome_file sample_cut.bw  
 replace sample with your acutal filenames  
@@ -22,7 +23,7 @@ genome_bed_file is hg19_sorted.bed for hg19, mm9_sorted.bed for mm9.
 
 ### Generate feature file
 
-generateAttributes generateAttribute.py config_file output_file  
+Usage: generateAttributes generateAttribute.py config_file output_file  
 config_file contains:  
 [setting]  
 bed_file=example.bed  
